@@ -3,8 +3,7 @@ import {
     CreateDateColumn,
     Entity,
     ManyToOne,
-    PrimaryGeneratedColumn,
-    Unique
+    PrimaryGeneratedColumn
 } from "typeorm";
 import { Tenant } from "../../tenants/entities/tenant.entity";
 import { TaskStatus } from "./status.enum";
@@ -16,9 +15,8 @@ export class Task {
     @PrimaryGeneratedColumn('uuid')
     id: string;
 
-    @Column({ 
-        type: 'text',
-        unique: true,
+    @Column({
+        type: 'text'
 })
     title: string;
 

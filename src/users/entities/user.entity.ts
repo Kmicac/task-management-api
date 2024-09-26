@@ -6,14 +6,15 @@ export class User {
     @PrimaryGeneratedColumn('uuid')
     id: string;
 
-
-    @Column()
+    @Column({ unique: true })
     name: string;
 
     @Column({ unique: true })
     email: string;
 
-    @Column()
+    @Column({
+        select: false,
+    })
     password: string;
 
     @Column({ type: 'enum', enum: ['Admin', 'User'], default: 'User' })

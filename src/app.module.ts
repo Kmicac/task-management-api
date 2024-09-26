@@ -19,7 +19,7 @@ import { TasksModule } from './tasks/tasks.module';
       password: process.env.DB_PASSWORD,      
       autoLoadEntities: true,
       synchronize: true,
-
+    
     }),
 
     AuthModule, 

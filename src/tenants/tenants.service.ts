@@ -28,31 +28,56 @@ export class TenantsService {
   }
 
   async findAll() {
-    const allTenants = await this.tenantsRepository.find({
-      relations: ['users', 'tasks']
-    })
-    return allTenants;
+    try {
+      const allTenants = await this.tenantsRepository.find({
+        relations: ['users', 'tasks']
+      })
+      return allTenants;
+      
+    } catch (error) {
+      this.logger.error(error);
+      throw new InternalServerErrorException('Unexpected error creating tenant, please check logs');
+    }
   }
 
   async findOne(id: string): Promise<Tenant> {
-    const tenant = await this.tenantsRepository.findOne({
-      where: { id },
-      relations: ['users', 'tasks'],
-    });
-    if (!tenant) {
-      throw new NotFoundException(`Tenant with ID ${id} not found`);
+    try {
+      const tenant = await this.tenantsRepository.findOne({
+        where: { id },
+        relations: ['users', 'tasks'],
+      });
+      if (!tenant) {
+        throw new NotFoundException(`Tenant with ID ${id} not found`);
+      }
+      
+      return tenant;
+    } catch (error) {
+      this.logger.error(error);
+      throw new InternalServerErrorException('Unexpected error creating tenant, please check logs');
     }
-    return tenant;
   }
 
-  async update(id: string, updateTenantDto: UpdateTenantDto): Promise<Tenant> {
-    const tenant = await this.findOne(id);
-    Object.assign(tenant, updateTenantDto);
-    return this.tenantsRepository.save(tenant);
+  async update(id: string, updateTenantDto: UpdateTenantDto) {
+    try {
+      const tenant = await this.findOne(id);
+      Object.assign(tenant, updateTenantDto);
+      return this.tenantsRepository.save(tenant);
+      
+    } catch (error) {
+      this.logger.error(error);
+      throw new InternalServerErrorException('Unexpected error creating tenant, please check logs');
+    }
   }
 
-  async remove(id: string): Promise<void> {
-    const tenant = await this.findOne(id);
-    await this.tenantsRepository.remove(tenant);
+  async remove(id: string) {
+    try {
+      const tenant = await this.findOne(id);
+      await this.tenantsRepository.remove(tenant);
+      return {message: `Tenant with the id: ${id} was successfully removed`};
+      
+    } catch (error) {
+      this.logger.error(error);
+      throw new InternalServerErrorException('Unexpected error creating tenant, please check logs');
+    }
   }
 }

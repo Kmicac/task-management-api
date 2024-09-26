@@ -1,4 +1,4 @@
-import { IsIn, IsNotEmpty, IsString, MinLength } from "class-validator";
+import { IsIn, IsNotEmpty, IsString, IsUUID, MinLength } from "class-validator";
 import { TaskStatus } from "../entities/status.enum";
 
 export class CreateTaskDto {
@@ -16,4 +16,8 @@ export class CreateTaskDto {
     @IsNotEmpty()
     @IsString()
     dueDate: string;
+
+    @IsNotEmpty()
+    @IsUUID()
+    tenantId: string;
 }

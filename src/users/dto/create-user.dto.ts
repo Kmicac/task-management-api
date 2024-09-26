@@ -1,4 +1,4 @@
-import { IsAlphanumeric, IsEmail, IsEnum, IsNotEmpty, IsPassportNumber, IsString, Matches, MinLength } from "class-validator";
+import { IsAlphanumeric, IsEmail, IsEnum, IsNotEmpty, IsPassportNumber, IsString, IsUUID, Matches, MaxLength, MinLength } from "class-validator";
 
 export class CreateUserDto {
 
@@ -13,13 +13,20 @@ export class CreateUserDto {
     })
     email: string;
 
-    @IsNotEmpty()
+    @IsString()
+    @MinLength(6)
+    @MaxLength(50)
+    @Matches(
+        /(?:(?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/, {
+        message: 'The password must have a Uppercase, lowercase letter and a number'
+    })
     password: string;
 
 
-    @IsEnum(['Admin', 'User'], { message: 'Role must be either Admin or User' })
+    @IsEnum(['Admin', 'User'])
     role: string;
 
     @IsNotEmpty()
+    @IsUUID()
     tenantId: string;
 }
