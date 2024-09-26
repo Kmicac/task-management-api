@@ -20,8 +20,7 @@ export class User {
     role: string;
 
     @ManyToOne(() => Tenant,
-        (tenant) => tenant.users,
-        { onDelete: 'CASCADE' })
+        (tenant) => tenant.users)
     tenant: Tenant;
 
     @CreateDateColumn()

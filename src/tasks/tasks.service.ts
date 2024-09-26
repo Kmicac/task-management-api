@@ -1,11 +1,32 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Task } from './entities/task.entity';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class TasksService {
-  create(createTaskDto: CreateTaskDto) {
-    return 'This action adds a new task';
+
+  private readonly logger = new Logger('TasksService');
+
+  constructor(
+    @InjectRepository(Task)
+    private readonly taskRepository: Repository<Task>
+
+  ) {}
+
+  async create(createTaskDto: CreateTaskDto) {
+    try {
+
+      const task = this.taskRepository.create(createTaskDto)
+      await this.taskRepository.save( task );
+
+      return task;
+    } catch (error) {
+      this.logger.error(error)
+      throw new InternalServerErrorException('Something went wrong, check logs..!');
+    }
   }
 
   findAll() {

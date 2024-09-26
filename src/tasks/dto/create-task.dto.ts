@@ -1,4 +1,4 @@
-import { IsIn, IsString, MinLength } from "class-validator";
+import { IsIn, IsNotEmpty, IsString, MinLength } from "class-validator";
 import { TaskStatus } from "../entities/status.enum";
 
 export class CreateTaskDto {
@@ -10,9 +10,10 @@ export class CreateTaskDto {
     @IsString()
     description: string;
 
-
-    @IsIn([TaskStatus.PENDING , TaskStatus.IN_PROGRESS, TaskStatus.COMPLETED],
-        { message: 'Status must be pending, in_progress, or completed' }
-    )
+    @IsIn([TaskStatus.PENDING , TaskStatus.IN_PROGRESS, TaskStatus.COMPLETED])
     status: TaskStatus;
+
+    @IsNotEmpty()
+    @IsString()
+    dueDate: string;
 }

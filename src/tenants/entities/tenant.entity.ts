@@ -1,6 +1,12 @@
-import { Task } from "src/tasks/entities/task.entity";
-import { User } from "src/users/entities/user.entity";
-import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import {
+    Column,
+    CreateDateColumn,
+    Entity,
+    OneToMany,
+    PrimaryGeneratedColumn
+} from "typeorm";
+import { Task } from "../../tasks/entities/task.entity";
+import { User } from "../../users/entities/user.entity";
 
 @Entity()
 export class Tenant {
@@ -9,6 +15,9 @@ export class Tenant {
 
     @Column()
     name: string;
+
+    @Column()
+    address: string;
 
     @CreateDateColumn()
     createdAt: Date;

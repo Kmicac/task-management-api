@@ -1,26 +1,58 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
 import { CreateTenantDto } from './dto/create-tenant.dto';
 import { UpdateTenantDto } from './dto/update-tenant.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Tenant } from './entities/tenant.entity';
 
 @Injectable()
 export class TenantsService {
-  create(createTenantDto: CreateTenantDto) {
-    return 'This action adds a new tenant';
+
+  private readonly logger = new Logger('TenantsService');
+
+  constructor(
+    @InjectRepository(Tenant)
+    private tenantsRepository: Repository<Tenant>,
+  ) { }
+
+  async create(createTenantDto: CreateTenantDto) {
+    try {
+      const tenant = this.tenantsRepository.create(createTenantDto)
+      await this.tenantsRepository.save(tenant)
+      return tenant;
+
+    } catch (error) {
+      this.logger.error(error);
+      throw new InternalServerErrorException('Unexpected error creating tenant, please check logs');
+    }
   }
 
-  findAll() {
-    return `This action returns all tenants`;
+  async findAll() {
+    const allTenants = await this.tenantsRepository.find({
+      relations: ['users', 'tasks']
+    })
+    return allTenants;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} tenant`;
+  async findOne(id: string): Promise<Tenant> {
+    const tenant = await this.tenantsRepository.findOne({
+      where: { id },
+      relations: ['users', 'tasks'],
+    });
+    if (!tenant) {
+      throw new NotFoundException(`Tenant with ID ${id} not found`);
+    }
+    return tenant;
   }
 
-  update(id: number, updateTenantDto: UpdateTenantDto) {
-    return `This action updates a #${id} tenant`;
+  async update(id: string, updateTenantDto: UpdateTenantDto): Promise<Tenant> {
+    const tenant = await this.findOne(id);
+    Object.assign(tenant, updateTenantDto);
+    return this.tenantsRepository.save(tenant);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} tenant`;
+  async remove(id: string): Promise<void> {
+    const tenant = await this.findOne(id);
+    await this.tenantsRepository.remove(tenant);
   }
 }

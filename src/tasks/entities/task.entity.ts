@@ -1,19 +1,25 @@
-import { Tenant } from "src/tenants/entities/tenant.entity";
 import {
     Column,
     CreateDateColumn,
     Entity,
     ManyToOne,
-    PrimaryGeneratedColumn
+    PrimaryGeneratedColumn,
+    Unique
 } from "typeorm";
+import { Tenant } from "../../tenants/entities/tenant.entity";
 import { TaskStatus } from "./status.enum";
+
+
 
 @Entity()
 export class Task {
     @PrimaryGeneratedColumn('uuid')
     id: string;
 
-    @Column()
+    @Column({ 
+        type: 'text',
+        unique: true,
+})
     title: string;
 
     @Column('text')
@@ -31,8 +37,10 @@ export class Task {
     createdAt: Date;
 
     @ManyToOne(() => Tenant,
-        (tenant) => tenant.tasks,
-        { onDelete: 'CASCADE' })
+        (tenant) => tenant.tasks,)
     tenant: Tenant;
+
+    @Column()
+    dueDate: string;
 
 }

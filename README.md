@@ -9,7 +9,17 @@
 ## Project Setup
 
 
-```bash
-$ yarn install
+1. Clone the project
+2. ```yarn install```
+
+3. Duplicate the file ```.env.template``` and rename it ```.env```
+
+4. Update the environment variables
+
+5. Start the database
 ```
+docker-compose up -d
+```
+
+6. Launch the server: ```yarn start:dev```
 
