@@ -1,19 +1,18 @@
-import { BadRequestException, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Tenant } from 'src/tenants/entities/tenant.entity';
 
 import * as bcrypt from 'bcryptjs';
+import { JwtService } from '@nestjs/jwt';
 
 import { User } from './entities/user.entity';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { Tenant } from '../tenants/entities/tenant.entity';
+import { CreateUserDto, LoginUserDto, UpdateUserDto, AssignRoleDto } from './dto/index';
+import { JwtPayload } from './interfaces/jwt-payload.interface';
 
 
 @Injectable()
 export class UsersService {
-
-  private readonly logger = new Logger('UsersService');
 
   constructor(
     @InjectRepository(User)
@@ -21,6 +20,9 @@ export class UsersService {
 
     @InjectRepository(Tenant)
     private readonly tenantRepository: Repository<Tenant>,
+
+    private readonly jwtService: JwtService,
+
   ) { }
 
   async create(createUserDto: CreateUserDto) {
@@ -37,36 +39,59 @@ export class UsersService {
         ...userData,
         tenant,
         password: bcrypt.hashSync(password, 10)
-        
+
       });
 
       await this.userRepository.save(user);
-      return user;
+      return {
+        ...user,
+        token: this.getJwtToken({ id: user.id })
+      };
 
     } catch (error) {
-      this.handleDBExceptions(error);
+      if (error.code === '23505')
+        console.error(error);
+      throw new BadRequestException(error.detail);
     }
   }
+
+  async login(loginUserDto: LoginUserDto) {
+
+    const { email, password } = loginUserDto;
+
+    const user = await this.userRepository.findOne({
+      where: { email },
+      select: { email: true, password: true, id: true }
+    });
+
+    if (!user)
+      throw new UnauthorizedException(`Credentials are not valid`);
+
+    if (!bcrypt.compareSync(password, user.password))
+      throw new UnauthorizedException(`Credentials are not valid`);
+
+    return {
+      ...user,
+      token: this.getJwtToken({ id: user.id })
+    };
+
+  }
+
 
   async findAll() {
     return await this.userRepository.find();
   }
 
   async findOne(id: string): Promise<User> {
-    try {
-      const user = await this.userRepository.findOne({ 
-        where: { id },
-        relations: ['tenant']
-      });
+    const user = await this.userRepository.findOne({
+      where: { id },
+      relations: ['tenant']
+    });
 
-      if (!user) {
-        throw new NotFoundException(`User with ID ${id} not found`);
-      }
-      return user;
-      
-    } catch (error) {
-      this.handleDBExceptions(error);
+    if (!user) {
+      throw new NotFoundException(`User with ID ${id} not found`);
     }
+    return user;
   }
 
   async update(id: string, updateUserDto: UpdateUserDto) {
@@ -80,7 +105,8 @@ export class UsersService {
       await this.userRepository.save(user);
       return user;
     } catch (error) {
-      this.handleDBExceptions(error);
+      console.log(error);
+      throw new InternalServerErrorException('Something went wrong, check logs..!');
     }
   }
 
@@ -92,12 +118,27 @@ export class UsersService {
     return { message: `User with the id: ${id} was successfully removed` }
   }
 
-  private handleDBExceptions(error: any) {
+  async assignRole(id: string, assignRoleDto: AssignRoleDto) {
+    const user = await this.userRepository.preload({
+      id: id,
+      ...assignRoleDto
+    });
+    if (!user) throw new NotFoundException(`User with id: ${id} not found`);
 
-    if (error.code === '23505')
-      throw new BadRequestException(error.detail);
-
-    this.logger.error(error)
-    throw new InternalServerErrorException('Unexpected error, check server logs');
+    try {
+      await this.userRepository.save(user);
+      return user;
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException('Something went wrong, check logs..!');
+    }
   }
+
+  // Generates a JWT token for the given payload
+  private getJwtToken(payload: JwtPayload) {
+
+    const token = this.jwtService.sign(payload);
+    return token;
+  }
+
 }

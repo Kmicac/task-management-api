@@ -2,8 +2,11 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, ParseUUIDPipe } from
 import { TenantsService } from './tenants.service';
 import { CreateTenantDto } from './dto/create-tenant.dto';
 import { UpdateTenantDto } from './dto/update-tenant.dto';
+import { Auth } from '../users/decorators/auth.decorator';
+import { Role } from '../users/interfaces/role.enum';
 
 @Controller('tenants')
+@Auth()
 export class TenantsController {
   constructor(private readonly tenantsService: TenantsService) {}
 
@@ -23,11 +26,13 @@ export class TenantsController {
   }
 
   @Patch(':id')
+  @Auth(Role.Admin)
   update(@Param('id', ParseUUIDPipe) id: string, @Body() updateTenantDto: UpdateTenantDto) {
     return this.tenantsService.update(id, updateTenantDto);
   }
 
   @Delete(':id')
+  @Auth(Role.Admin)
   remove(@Param('id', ParseUUIDPipe) id: string) {
     return this.tenantsService.remove(id);
   }

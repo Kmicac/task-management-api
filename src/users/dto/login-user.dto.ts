@@ -1,11 +1,6 @@
-import { IsEmail, IsEnum, IsNotEmpty, IsString, IsUUID, Matches, MaxLength, MinLength } from "class-validator";
+import { IsEmail, IsString, Matches, MaxLength, MinLength } from "class-validator";
 
-export class CreateUserDto {
-
-    @IsString()
-    @MinLength(4)
-    @IsNotEmpty()
-    name: string;
+export class LoginUserDto {
 
     @IsEmail()
     @Matches(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/, {
@@ -22,11 +17,4 @@ export class CreateUserDto {
     })
     password: string;
 
-
-    @IsEnum(['Admin', 'User'])
-    role: string;
-
-    @IsNotEmpty()
-    @IsUUID()
-    tenantId: string;
 }

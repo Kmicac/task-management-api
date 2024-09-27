@@ -1,4 +1,4 @@
-import { Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
 import { CreateTenantDto } from './dto/create-tenant.dto';
 import { UpdateTenantDto } from './dto/update-tenant.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -22,8 +22,9 @@ export class TenantsService {
       return tenant;
 
     } catch (error) {
-      this.logger.error(error);
-      throw new InternalServerErrorException('Unexpected error creating tenant, please check logs');
+      if (error.code === '23505')
+        this.logger.error(error);
+      throw new BadRequestException(error.detail);
     }
   }
 
@@ -33,7 +34,7 @@ export class TenantsService {
         relations: ['users', 'tasks']
       })
       return allTenants;
-      
+
     } catch (error) {
       this.logger.error(error);
       throw new InternalServerErrorException('Unexpected error creating tenant, please check logs');
@@ -49,7 +50,7 @@ export class TenantsService {
       if (!tenant) {
         throw new NotFoundException(`Tenant with ID ${id} not found`);
       }
-      
+
       return tenant;
     } catch (error) {
       this.logger.error(error);
@@ -62,7 +63,7 @@ export class TenantsService {
       const tenant = await this.findOne(id);
       Object.assign(tenant, updateTenantDto);
       return this.tenantsRepository.save(tenant);
-      
+
     } catch (error) {
       this.logger.error(error);
       throw new InternalServerErrorException('Unexpected error creating tenant, please check logs');
@@ -73,8 +74,8 @@ export class TenantsService {
     try {
       const tenant = await this.findOne(id);
       await this.tenantsRepository.remove(tenant);
-      return {message: `Tenant with the id: ${id} was successfully removed`};
-      
+      return { message: `Tenant with the id: ${id} was successfully removed` };
+
     } catch (error) {
       this.logger.error(error);
       throw new InternalServerErrorException('Unexpected error creating tenant, please check logs');

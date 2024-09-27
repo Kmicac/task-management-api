@@ -2,8 +2,11 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, ParseUUIDPipe } from
 import { TasksService } from './tasks.service';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
+import { Auth } from '../users/decorators/auth.decorator';
+import { Role } from '../users/interfaces/role.enum';
 
 @Controller('tasks')
+@Auth()
 export class TasksController {
   constructor(private readonly tasksService: TasksService) {}
 
@@ -28,6 +31,7 @@ export class TasksController {
   }
 
   @Delete(':id')
+  @Auth(Role.Admin)
   remove(@Param('id', ParseUUIDPipe) id: string) {
     return this.tasksService.remove(id);
   }

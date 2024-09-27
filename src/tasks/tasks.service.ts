@@ -1,10 +1,11 @@
-import { Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
+
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
-import { InjectRepository } from '@nestjs/typeorm';
 import { Task } from './entities/task.entity';
-import { Repository } from 'typeorm';
-import { Tenant } from 'src/tenants/entities/tenant.entity';
+import { Tenant } from '../tenants/entities/tenant.entity';
 
 @Injectable()
 export class TasksService {
@@ -38,8 +39,9 @@ export class TasksService {
 
       return this.taskRepository.save(task);
     } catch (error) {
-      this.logger.error(error)
-      throw new InternalServerErrorException('Something went wrong, check logs..!');
+      if (error.code === '23505')
+        this.logger.error(error);
+      throw new BadRequestException(error.detail);
     }
   }
 

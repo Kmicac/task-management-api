@@ -1,5 +1,5 @@
-import { Tenant } from "src/tenants/entities/tenant.entity";
 import { Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Tenant } from '../../tenants/entities/tenant.entity';
 
 @Entity()
 export class User {

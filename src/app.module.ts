@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
-import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { TenantsModule } from './tenants/tenants.module';
 import { TasksModule } from './tasks/tasks.module';
+
 @Module({
   imports: [
 
@@ -21,8 +21,7 @@ import { TasksModule } from './tasks/tasks.module';
       synchronize: true,
     
     }),
-
-    AuthModule, 
+ 
     UsersModule, 
     TenantsModule, 
     TasksModule
