@@ -20,7 +20,7 @@ import { User } from './entities/user.entity';
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @Post('create')
+  @Post('register')
   @ApiOperation({ summary: 'Create a new user' })
   @ApiBody({ type: CreateUserDto })
   @ApiResponse({ status: 201, description: 'User has been successfully created.', type: User })
@@ -42,7 +42,7 @@ export class UsersController {
   @Auth()
   @ApiOperation({ summary: 'Retrieve all users' })
   @ApiResponse({ status: 200, description: 'List of all users.' })
-  @ApiResponse({ status: 403, description: 'Forbidden.' })  // Respuesta para acceso denegado
+  @ApiResponse({ status: 403, description: 'Forbidden.' })  
   findAll() {
     return this.usersService.findAll();
   }
@@ -52,7 +52,7 @@ export class UsersController {
   @ApiOperation({ summary: 'Retrieve a user by ID' })
   @ApiResponse({ status: 200, description: 'User found.' })
   @ApiResponse({ status: 404, description: 'User not found.' })
-  @ApiResponse({ status: 403, description: 'Forbidden.' })  // Respuesta para acceso denegado
+  @ApiResponse({ status: 403, description: 'Forbidden.' })  
   findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.usersService.findOne(id);
   }
@@ -74,7 +74,7 @@ export class UsersController {
   @ApiBody({ type: AssignRoleDto })
   @ApiResponse({ status: 200, description: 'User role updated successfully.' })
   @ApiResponse({ status: 404, description: 'User not found.' })
-  @ApiResponse({ status: 403, description: 'Forbidden.' })  // Respuesta para acceso denegado
+  @ApiResponse({ status: 403, description: 'Forbidden.' })  
   updateRole(@Param('id', ParseUUIDPipe) id: string, @Body() assignRoleDto: AssignRoleDto) {
     return this.usersService.assignRole(id, assignRoleDto);
   }
@@ -84,7 +84,7 @@ export class UsersController {
   @ApiOperation({ summary: 'Delete a user by ID' })
   @ApiResponse({ status: 200, description: 'User successfully removed.' })
   @ApiResponse({ status: 404, description: 'User not found.' })
-  @ApiResponse({ status: 403, description: 'Forbidden.' })  // Respuesta para acceso denegado
+  @ApiResponse({ status: 403, description: 'Forbidden.' })  
   remove(@Param('id', ParseUUIDPipe) id: string) {
     return this.usersService.remove(id);
   }

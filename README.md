@@ -10,9 +10,9 @@
 
 
 1. Clone the project
-   ```bash
-   git clone https://github.com/Kmicac/task-management-api.git
-   ```
+```bash
+git clone https://github.com/Kmicac/task-management-api.git
+```
 
 2. Navigate to the project directory
 ```

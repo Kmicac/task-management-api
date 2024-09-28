@@ -38,6 +38,7 @@ export class TasksController {
   }
 
   @Patch(':id')
+  @Auth(Role.Admin) 
   @ApiOperation({ summary: 'Update a task by ID' })
   @ApiBody({ type: UpdateTaskDto })  
   @ApiResponse({ status: 200, description: 'Task updated successfully.', type: Task })  
