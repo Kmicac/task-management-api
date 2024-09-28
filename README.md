@@ -15,11 +15,13 @@
    ```
 
 2. Navigate to the project directory
-```cd task-management-api
+```
+cd task-management-api
 ```
 
 3. Install the dependencies 
-```yarn install
+```
+yarn install
 ```
 
 4. Duplicate the file ```.env.template``` and rename it ```.env```
@@ -32,7 +34,8 @@ docker-compose up -d
 ```
 
 7. Launch the server
- ```yarn start:dev
+ ```
+ yarn start:dev
  ```
 
 ## Runing Tests
