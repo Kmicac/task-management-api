@@ -3,7 +3,7 @@ import { TasksService } from './tasks.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Task } from './entities/task.entity';
 import { Tenant } from '../tenants/entities/tenant.entity';
-import { NotFoundException, InternalServerErrorException } from '@nestjs/common';
+import { NotFoundException } from '@nestjs/common';
 import { Repository, DeleteResult } from 'typeorm';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';

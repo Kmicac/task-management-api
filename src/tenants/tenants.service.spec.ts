@@ -1,9 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { TenantsService } from './tenants.service';
+import {  NotFoundException } from '@nestjs/common';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Tenant } from './entities/tenant.entity';
 import { Repository } from 'typeorm';
-import { BadRequestException, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+
+import { TenantsService } from './tenants.service';
+import { Tenant } from './entities/tenant.entity';
 import { CreateTenantDto } from './dto/create-tenant.dto';
 import { UpdateTenantDto } from './dto/update-tenant.dto';
 
