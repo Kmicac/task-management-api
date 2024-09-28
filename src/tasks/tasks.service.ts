@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 
@@ -10,8 +10,6 @@ import { Tenant } from '../tenants/entities/tenant.entity';
 @Injectable()
 export class TasksService {
 
-  private readonly logger = new Logger('TasksService');
-
   constructor(
     @InjectRepository(Task)
     private readonly taskRepository: Repository<Task>,
@@ -21,71 +19,56 @@ export class TasksService {
   ) { }
 
   async create(createTaskDto: CreateTaskDto) {
-    try {
-      const { title, description, status, dueDate, tenantId } = createTaskDto;
 
-      const tenant = await this.tenantRepository.findOneBy({ id: tenantId });
-      if (!tenant) {
-        throw new NotFoundException('Tenant not found');
-      }
+    const { tenantId, ...taskData } = createTaskDto;
 
-      const task = this.taskRepository.create({
-        title,
-        description,
-        status,
-        dueDate,
-        tenant,
-      });
-
-      return this.taskRepository.save(task);
-    } catch (error) {
-      if (error.code === '23505')
-        this.logger.error(error);
-      throw new BadRequestException(error.detail);
+    const tenant = await this.tenantRepository.findOneBy({ id: tenantId });
+    if (!tenant) {
+      throw new NotFoundException('Tenant not found');
     }
+
+    const task = this.taskRepository.create({
+      tenant,
+      ...taskData,
+    });
+
+    await this.taskRepository.save(task);
+    return task;
+
   }
 
   async findAll() {
-    return await this.taskRepository.find();
+    const allTasks = await this.taskRepository.find();
+    return allTasks;
   }
 
   async findOne(id: string) {
-    try {
-      const task = await this.taskRepository.findOneBy({ id });
+      const task = await this.taskRepository.preload({
+        id: id,
+        ...UpdateTaskDto
+      });
       if (!task) {
         throw new NotFoundException(`Task with ID ${id} not found`);
       }
       return task;
-    } catch (error) {
-      this.logger.error(error)
-      throw new InternalServerErrorException('Something went wrong, check logs')
-    }
   }
 
   async update(id: string, updateTaskDto: UpdateTaskDto) {
-    try {
-      const task = await this.findOne(id);
+    const task = await this.taskRepository.preload({
+      id: id,
+      ...updateTaskDto
+    })
+    if (!task) throw new NotFoundException(`task with id: ${id} not found`);
+    await this.taskRepository.save(task);
 
-      Object.assign(task, updateTaskDto);
-
-      return this.taskRepository.save(task);
-
-    } catch (error) {
-      this.logger.error(error)
-      throw new InternalServerErrorException('Something went wrong, check logs')
-    }
+    return task;
   }
 
   async remove(id: string) {
-    try {
-      const result = await this.taskRepository.delete(id);
-      if (result.affected === 0) {
-        throw new NotFoundException(`Task with ID ${id} not found`);
-      }
-      return { message: `Task with the id: ${id} was successfully removed` }
-    } catch (error) {
-      this.logger.error(error)
-      throw new InternalServerErrorException('Something went wrong, check logs')
+    const result = await this.taskRepository.delete(id);
+    if (result.affected === 0) {
+      throw new NotFoundException(`Task with ID ${id} not found`);
     }
+    return { message: `Task with the id: ${id} was successfully removed` }
   }
 }

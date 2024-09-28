@@ -12,6 +12,10 @@ import { LoginUserDto, UpdateUserDto, AssignRoleDto } from './dto';
 import { User } from './entities/user.entity';
 import { Tenant } from '../tenants/entities/tenant.entity';
 
+jest.mock('bcrypt', () => ({
+  compareSync: jest.fn(),
+}));
+
 describe('UsersService', () => {
   let service: UsersService;
   let userRepository: jest.Mocked<Repository<User>>;
@@ -64,10 +68,19 @@ describe('UsersService', () => {
         email: 'test@example.com',
         password: 'password123',
         name: 'Test User',
-        role: 'USER',
+        role: 'User',
         tenantId: '1',
       };
-      const tenant: Tenant = { id: '1', name: 'Test Tenant', address: '123 Test St', createdAt: new Date(), users: [], tasks: [] };
+
+      const tenant: Tenant = {
+        id: '1',
+        name: 'Test Tenant',
+        address: '123 Test St',
+        createdAt: new Date(),
+        users: [],
+        tasks: []
+      };
+
       const createdUser: User = {
         id: '1',
         ...createUserDto,
@@ -89,9 +102,9 @@ describe('UsersService', () => {
     it('should throw NotFoundException if tenant not found', async () => {
       const createUserDto: CreateUserDto = {
         email: 'test@example.com',
-        password: 'password123',
+        password: 'Password123',
         name: 'Test User',
-        role: 'USER',
+        role: 'User',
         tenantId: 'non_existent',
       };
 
@@ -101,58 +114,47 @@ describe('UsersService', () => {
     });
   });
 
-  jest.mock('bcrypt', () => ({
-    compareSync: jest.fn(),
-  }));
-
   describe('login', () => {
     it('should return user with token on successful login', async () => {
       const loginUserDto: LoginUserDto = {
         email: 'test@example.com',
         password: 'Password12345',
       };
-      const user: Partial<User> = { 
-        id: '1', 
-        email: loginUserDto.email, 
-        password: 'hashed_password',
+      const user: Partial<User> = {
+        id: '1',
+        email: loginUserDto.email,
+        password: '$2a$10$fcyKyfCO0A4Se9MkU0937.5Sh.SOjlr2FbQDODt3qXvdfmxpecrKG',
         name: 'Test User',
-        role: 'USER',
+        role: 'User',
         tenant: { id: '1', name: 'Test Tenant' } as Tenant,
         createdAt: new Date()
       };
-  
+
       userRepository.findOne.mockResolvedValue(user as User);
       jwtService.sign.mockReturnValue('mocked_token');
-  
-      // Ensure bcrypt.compareSync returns true
-      (require('bcrypt') as jest.Mocked<typeof import('bcrypt')>).compareSync.mockReturnValue(true);
-  
+
       const result = await service.login(loginUserDto);
-  
+
       expect(result).toEqual({ ...user, token: 'mocked_token' });
     });
-  
-    // Add a test for failed login
+
     it('should throw UnauthorizedException on failed login', async () => {
       const loginUserDto: LoginUserDto = {
         email: 'test@example.com',
-        password: 'Password12345',
+        password: 'wrong_password',
       };
-      const user: Partial<User> = { 
-        id: '1', 
-        email: loginUserDto.email, 
+      const user: Partial<User> = {
+        id: '1',
+        email: loginUserDto.email,
         password: 'hashed_password',
         name: 'Test User',
-        role: 'USER',
+        role: 'User',
         tenant: { id: '1', name: 'Test Tenant' } as Tenant,
         createdAt: new Date()
       };
-  
+
       userRepository.findOne.mockResolvedValue(user as User);
-  
-      // Ensure bcrypt.compareSync returns false for wrong password
-      (require('bcrypt') as jest.Mocked<typeof import('bcrypt')>).compareSync.mockReturnValue(false);
-  
+
       await expect(service.login(loginUserDto)).rejects.toThrow(UnauthorizedException);
     });
   });
@@ -177,8 +179,11 @@ describe('UsersService', () => {
         id: '1',
         email: 'test@example.com',
         name: 'Test User',
-        role: 'USER',
-        tenant: { id: '1', name: 'Test Tenant' } as Tenant,
+        role: 'User',
+        tenant: {
+          id: '1',
+          name: 'Test Tenant'
+        } as Tenant,
         createdAt: new Date()
       };
       userRepository.findOne.mockResolvedValue(user as User);
@@ -201,7 +206,7 @@ describe('UsersService', () => {
       const updatedUser: Partial<User> = {
         id: '1',
         ...updateUserDto,
-        role: 'USER',
+        role: 'User',
         tenant: { id: '1', name: 'Test Tenant' } as Tenant,
         createdAt: new Date()
       };
@@ -217,7 +222,11 @@ describe('UsersService', () => {
     it('should throw NotFoundException if user not found', async () => {
       userRepository.preload.mockResolvedValue(null);
 
-      await expect(service.update('nonexistent', { name: 'Test', email: 'test@example.com', tenantId: '1' })).rejects.toThrow(NotFoundException);
+      await expect(service.update('nonexistent', { 
+        name: 'Test',
+        email: 'test@example.com', 
+        tenantId: '1' 
+      })).rejects.toThrow(NotFoundException);
     });
   });
 
@@ -239,7 +248,7 @@ describe('UsersService', () => {
 
   describe('assignRole', () => {
     it('should assign a role to a user', async () => {
-      const assignRoleDto: AssignRoleDto = { role: 'ADMIN' };
+      const assignRoleDto: AssignRoleDto = { role: 'Admin' };
       const updatedUser: Partial<User> = {
         id: '1',
         role: 'ADMIN',
@@ -260,7 +269,7 @@ describe('UsersService', () => {
     it('should throw NotFoundException if user not found', async () => {
       userRepository.preload.mockResolvedValue(null);
 
-      await expect(service.assignRole('nonexistent', { role: 'ADMIN' })).rejects.toThrow(NotFoundException);
+      await expect(service.assignRole('nonexistent', { role: 'Admin' })).rejects.toThrow(NotFoundException);
     });
   });
 });
