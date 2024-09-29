@@ -1,4 +1,4 @@
-import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Controller, Get, Post, Body, Patch, Param, Delete, ParseUUIDPipe } from '@nestjs/common';
 import { TasksService } from './tasks.service';
 import { CreateTaskDto } from './dto/create-task.dto';
@@ -8,6 +8,7 @@ import { Role } from '../users/interfaces/role.enum';
 import { Task } from './entities/task.entity';
 
 @ApiTags('Tasks')
+@ApiBearerAuth()
 @Controller('tasks')
 @Auth()
 export class TasksController {

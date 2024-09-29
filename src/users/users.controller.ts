@@ -1,4 +1,4 @@
-import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { 
   Controller, 
   Get, 
@@ -40,6 +40,7 @@ export class UsersController {
 
   @Get()
   @Auth()
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Retrieve all users' })
   @ApiResponse({ status: 200, description: 'List of all users.' })
   @ApiResponse({ status: 403, description: 'Forbidden.' })  
@@ -49,6 +50,7 @@ export class UsersController {
 
   @Get(':id')
   @Auth()
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Retrieve a user by ID' })
   @ApiResponse({ status: 200, description: 'User found.' })
   @ApiResponse({ status: 404, description: 'User not found.' })
@@ -59,6 +61,7 @@ export class UsersController {
 
   @Patch(':id')
   @Auth()
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Update a user by ID' })
   @ApiBody({ type: UpdateUserDto })
   @ApiResponse({ status: 200, description: 'User updated successfully.' })
@@ -70,7 +73,8 @@ export class UsersController {
 
   @Patch('role/:id')
   @Auth(Role.Admin)
-  @ApiOperation({ summary: 'Assign a role to a user' })
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Assign a role to a user (To make this request you must be an administrator)' })
   @ApiBody({ type: AssignRoleDto })
   @ApiResponse({ status: 200, description: 'User role updated successfully.' })
   @ApiResponse({ status: 404, description: 'User not found.' })
@@ -81,7 +85,8 @@ export class UsersController {
 
   @Delete(':id')
   @Auth(Role.Admin)
-  @ApiOperation({ summary: 'Delete a user by ID' })
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Delete a user by ID (To make this request you must be an administrator)' })
   @ApiResponse({ status: 200, description: 'User successfully removed.' })
   @ApiResponse({ status: 404, description: 'User not found.' })
   @ApiResponse({ status: 403, description: 'Forbidden.' })  
